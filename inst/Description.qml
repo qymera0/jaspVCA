@@ -5,7 +5,7 @@ Description
 {
     title:       qsTr("Variability Chart")
     description: qsTr("Generates variability charts using the VCA package.")
-    version:     "0.1.0"
+    version:     "0.2.0"
     author:      "Developer <samuelbaco@gmail.com>"
     maintainer:  "Developer <samuelbaco@gmail.com>"
     website:     "https://github.com/jasp-stats/jaspVariability"
