@@ -18,6 +18,5 @@ Description
         title: qsTr("Variability Plot")
         qml:   "VarPlot.qml"
         func:  "VarPlot"
-        info:  qsTr("Creates variability plots to visualize variance components across hierarchical factors.")
     }
 }

@@ -1,87 +1,226 @@
 import QtQuick
-import JASP
 import JASP.Controls
 
 Form
 {
     VariablesForm
     {
-        AvailableVariablesList { name: "allVariablesList" }
+        AvailableVariablesList { name: "variables" }
         AssignedVariablesList
         {
-            name: "dependent"
-            title: qsTr("Dependent Variable")
+            name:           "dependent"
+            title:          qsTr("Dependent Variable")
             singleVariable: true
             allowedColumns: ["scale"]
-            info: qsTr("The continuous response variable to be analyzed.")
         }
         AssignedVariablesList
         {
-            name: "randomFactors"
-            title: qsTr("Factors (Hierarchical Order)")
+            name:           "randomFactors"
+            title:          qsTr("Factors (Nesting Order)")
             allowedColumns: ["nominal", "ordinal"]
-            info: qsTr("Categorical factors defining the variance components, ordered from highest to lowest hierarchy.")
         }
     }
 
     Section
     {
-        title: qsTr("Plot Options")
+        title: qsTr("Graph Configuration")
 
-        DropDown
+        CheckBox
         {
-            name: "type"
-            label: qsTr("Plot Type")
-            values: [
-                { label: qsTr("Scatterplot"), value: "1" },
-                { label: qsTr("SD/CV Plot"), value: "2" },
-                { label: qsTr("Both"), value: "3" }
-            ]
-            info: qsTr("Select the type of variability chart to display.")
-        }
-
-        DropDown
-        {
-            name: "varType"
-            label: qsTr("Variance Measure (for Type 2/3)")
-            values: [
-                { label: qsTr("Standard Deviation (SD)"), value: "SD" },
-                { label: qsTr("Coefficient of Variation (CV)"), value: "CV" }
-            ]
-            info: qsTr("Measure of variability to plot when Type 2 or 3 is selected.")
-        }
-
-        CheckBox 
-        { 
-            name: "keepOrder"
-            label: qsTr("Keep factor ordering from data")
+            name:    "keepOrder"
+            label:   qsTr("Keep original factor level order")
             checked: true
-            info: qsTr("Preserves the original data ordering of factor levels in the plot.") 
         }
-        
-        CheckBox 
-        { 
-            name: "boxplot"
-            label: qsTr("Add Boxplot to lowest level")
-            checked: false
-            info: qsTr("Overlays a boxplot on the lowest hierarchical factor level.") 
+
+        DropDown
+        {
+            name:   "type"
+            label:  qsTr("Plot type")
+            values: ["1", "2", "3"]
         }
-        
-        CheckBox 
-        { 
-            name: "meanLine"
-            label: qsTr("Add Overall Mean Line")
+
+        RadioButtonGroup
+        {
+            name:    "varType"
+            title:   qsTr("Variability metric")
+            enabled: options.type !== "1"
+            RadioButton { value: "SD"; label: qsTr("Standard deviation (SD)") }
+            RadioButton { value: "CV"; label: qsTr("Coefficient of variation (CV)") }
+        }
+    }
+
+    Section
+    {
+        title: qsTr("Summarization")
+
+        CheckBox
+        {
+            name:    "showMeanPoints"
+            label:   qsTr("Display factor level mean points")
+            checked: true
+        }
+
+        CheckBox
+        {
+            name:    "showMeanLine"
+            label:   qsTr("Display factor level mean lines")
+            checked: true
+
+            Group
+            {
+                enabled: options.showMeanLine
+
+                CheckBox
+                {
+                    name:    "meanLineGrand"
+                    label:   qsTr("Overall mean (Grand mean / Intercept)")
+                    checked: true
+                }
+                CheckBox
+                {
+                    name:    "meanLineFactors"
+                    label:   qsTr("Factor level means")
+                    checked: true
+                }
+            }
+        }
+    }
+
+    Section
+    {
+        title: qsTr("Labels")
+
+        TextField
+        {
+            name:  "titleText"
+            label: qsTr("Main title")
+        }
+
+        TextField
+        {
+            name:  "yAxisLabel"
+            label: qsTr("Y-axis label")
+        }
+
+        TextField
+        {
+            name:    "sdYAxisLabel"
+            label:   qsTr("SD/CV Y-axis label")
+            enabled: options.type !== "1"
+        }
+
+        CheckBox
+        {
+            name:    "showVCnam"
+            label:   qsTr("Display variance component names")
+            checked: true
+        }
+
+        CheckBox
+        {
+            name:    "useVarNam"
+            label:   qsTr("Prepend factor variable names to level specifiers")
             checked: false
-            info: qsTr("Draws a horizontal line indicating the overall mean across all data.") 
+        }
+    }
+
+    Section
+    {
+        title: qsTr("Appearance & Visuals")
+
+        DropDown
+        {
+            name:   "colorPalette"
+            label:  qsTr("Color palette")
+            values: ["whirlpool", "jasp", "viridis"]
+        }
+
+        CheckBox
+        {
+            name:    "showBG"
+            label:   qsTr("Alternate background coloring for top-level factor")
+            checked: false
+        }
+
+        CheckBox
+        {
+            name:    "customYLim"
+            label:   qsTr("Custom Y-axis limits")
+            checked: false
+
+            Group
+            {
+                enabled: options.customYLim
+                DoubleField { name: "yMin"; label: qsTr("Minimum Y"); defaultValue: 0 }
+                DoubleField { name: "yMax"; label: qsTr("Maximum Y"); defaultValue: 100 }
+            }
+        }
+    }
+
+    Section
+    {
+        title: qsTr("Reference Lines")
+
+        CheckBox
+        {
+            name:    "showVLine"
+            label:   qsTr("Vertical factor level boundary lines")
+            checked: true
+
+            Group
+            {
+                enabled: options.showVLine
+                CheckBox
+                {
+                    name:    "vLineTable"
+                    label:   qsTr("Extend vertical lines into design table")
+                    checked: true
+                }
+            }
+        }
+
+        CheckBox
+        {
+            name:    "showHLine"
+            label:   qsTr("Horizontal reference lines")
+            checked: false
+        }
+    }
+
+    Section
+    {
+        title: qsTr("Other Options")
+
+        DoubleField
+        {
+            name:         "htab"
+            label:        qsTr("Design table vertical proportion (htab)")
+            defaultValue: 0.2
+            min:          0.05
+            max:          0.8
+        }
+
+        CheckBox
+        {
+            name:    "showJoin"
+            label:   qsTr("Connect observed points within lowest factor level")
+            checked: true
+        }
+
+        CheckBox
+        {
+            name:    "showBoxplot"
+            label:   qsTr("Overlay subgroup boxplots")
+            checked: false
         }
 
         IntegerField
         {
-            name: "maxLevel"
-            label: qsTr("Max Factor Levels for Vertical Lines")
+            name:         "maxLevel"
+            label:        qsTr("Maximum factor levels allowed for vertical lines")
             defaultValue: 25
-            min: 1
-            info: qsTr("Maximum number of factor levels before vertical separation lines are suppressed to prevent visual clutter.")
+            min:          2
+            max:          500
         }
     }
 }
